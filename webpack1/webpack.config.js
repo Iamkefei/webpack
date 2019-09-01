@@ -1,28 +1,39 @@
 let path = require('path');
 let HtmlWebpackPlugin = require('html-webpack-plugin');
+let MiniCssExtractPlugin = require('mini-css-extract-plugin');
+let OptimizeCss = require('optimize-css-assets-webpack-plugin');
+let UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
+  optimization: {
+    minimizer: [
+        new UglifyJsPlugin({
+            cache: true,
+            parallel: true,
+            sourceMap: true
+        }),
+        new OptimizeCss()
+    ]
+  },
   devServer: { // 开发服务器的配置
       port: 3000,
       progress: true,
       contentBase: './build',
       compress: true
   },
-  mode: 'development',   // 模式 默认两种 production development
+  mode: 'production',   // 模式 默认两种 production development
   entry: './src/index.js',  // 入口
   output: {
-      filename: 'bundle.[hash]js',  //  打包后的文件名
+      filename: 'bundle.js',  //  打包后的文件名
       path: path.resolve(__dirname, 'build'),  // 路径必须是一个绝对路径
   },
   plugins:[ // 数组 放着所有的webpack插件
      new HtmlWebpackPlugin({
          template: './src/index.html',
-         filename: 'index.html',
-         minify: {
-             removeAttributeQuotes: true,
-             collapseWhitespace: true
-         },
-         hash: true
+         filename: 'index.html'
+     }),
+     new MiniCssExtractPlugin({
+         filename: 'main.css'
      })
   ],
   module: { // 模块
@@ -34,21 +45,34 @@ module.exports = {
          // loader的顺序 默认是从右向左执行
          // loader还可以写成 对象方式
          {
+           test: /\.js$/,
+           use: {
+               loader: 'babel-loader',
+               options: {
+                   presets: [
+                       '@babel/preset-env'
+                   ],
+                   plugins: [
+                       ["@babel/plugin-proposal-decorators", { "legacy": true }],
+                       ["@babel/plugin-proposal-class-properties", { "loose" : true }]
+                   ]
+               }
+           }
+         },
+         {
              test: /\.css$/,
              use: [
-                 {
-                     loader: 'style-loader',
-                 },
-                 'css-loader'
+                 MiniCssExtractPlugin.loader,
+                 'css-loader',
+                 'postcss-loader'
              ]
          },
          {
              test: /\.less$/,
              use: [
-                 {
-                     loader: 'style-loader',
-                 },
+                 MiniCssExtractPlugin.loader,
                  'css-loader',
+                 'postcss-loader',
                  'less-loader'
              ]
          }
