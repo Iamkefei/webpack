@@ -3,15 +3,16 @@ let HtmlWebpackPlugin = require('html-webpack-plugin');
 let MiniCssExtractPlugin = require('mini-css-extract-plugin');
 let OptimizeCss = require('optimize-css-assets-webpack-plugin');
 let UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+let webpack = require('webpack');
 
 module.exports = {
   optimization: {
     minimizer: [
-        new UglifyJsPlugin({
-            cache: true,
-            parallel: true,
-            sourceMap: true
-        }),
+        // new UglifyJsPlugin({
+        //     cache: true,
+        //     parallel: true,
+        //     sourceMap: true
+        // }),
         new OptimizeCss()
     ]
   },
@@ -26,6 +27,7 @@ module.exports = {
   output: {
       filename: 'bundle.js',  //  打包后的文件名
       path: path.resolve(__dirname, 'build'),  // 路径必须是一个绝对路径
+      // publicPath: 'http://47.98.177.32/'
   },
   plugins:[ // 数组 放着所有的webpack插件
      new HtmlWebpackPlugin({
@@ -34,8 +36,14 @@ module.exports = {
      }),
      new MiniCssExtractPlugin({
          filename: 'main.css'
+     }),
+     new webpack.ProvidePlugin({
+         $: 'jquery'
      })
   ],
+  externals: {
+    jquery: "$"
+  },
   module: { // 模块
      rules: [ // 规则 css-loader 连续 @import这种语法的
          // style-loader 他是吧css插入到head的标签中
@@ -44,6 +52,30 @@ module.exports = {
          // 多个loader需要[]
          // loader的顺序 默认是从右向左执行
          // loader还可以写成 对象方式
+         {
+           test: /\.html$/,
+           use: 'html-withimg-loader'
+         },
+         {
+           test:/\.(png|jpg|gif)$/,
+           use: {
+              loader: 'url-loader',
+              options: {
+                  limit: 1,
+                  outputPath: 'img/',
+                  publicPath: 'http://47.98.177.32/img/'
+              }
+           }
+         },
+         {
+             test: /\.js$/,
+             use: {
+                 loader: 'eslint-loader',
+                 options: {
+                     enforce: 'pre'
+                 }
+             }
+         },
          {
            test: /\.js$/,
            use: {
@@ -54,10 +86,13 @@ module.exports = {
                    ],
                    plugins: [
                        ["@babel/plugin-proposal-decorators", { "legacy": true }],
-                       ["@babel/plugin-proposal-class-properties", { "loose" : true }]
+                       ["@babel/plugin-proposal-class-properties", { "loose" : true }],
+                       "@babel/plugin-transform-runtime"
                    ]
                }
-           }
+           },
+           include: path.resolve(__dirname, 'src'),
+           exclude: /node_modules/
          },
          {
              test: /\.css$/,
