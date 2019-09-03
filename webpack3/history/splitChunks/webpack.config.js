@@ -3,12 +3,32 @@ let HtmlWebpackPlugin = require('html-webpack-plugin');
 let webpack = require('webpack');
 
 module.exports = {
+    optimization: {
+      splitChunks:{  // 分割代码块
+          cacheGroups: { // 缓存组
+              common:{  //  公共的模块
+                  chunks: 'initial',
+                  minSize: 0,
+                  minChunks: 2
+              },
+              vendor: {
+                  priority: 1,
+                  test: /node_modules/,  //把你抽离出来
+                  chunks: 'initial',
+                  minSize: 0,
+                  minChunks: 2
+              }
+          }
+      }
+    },
     mode: 'development',
     entry: {
-        index: './src/index.js'
+        index: './src/index.js',
+        other: './src/other.js'
     },
     devServer: {
       port: 3000,
+      open: true,
       contentBase: './dist'
     },
     module: {

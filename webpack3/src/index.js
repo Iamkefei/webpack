@@ -1,14 +1,8 @@
-import React from 'react';
-import {render} from 'react-dom';
-
-render(<h1>jsx</h1>, window.root);
-// import jquery from 'jquery';
-// import moment from 'moment';
-// // 手动引入所需要的语言
-// import 'moment/locale/zh-cn'
-//
-// // 设置语言
-// moment.locale('zh-cn');
-//
-// let r = moment().endOf('day').fromNow();
-// console.log(r);
+let button = document.createElement('button');
+button.innerHTML = 'hello';
+button.addEventListener('click',function() {
+   import('./source.js').then(data => {
+       console.log(data.default)
+   })
+});
+document.body.appendChild(button);
